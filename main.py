@@ -5,7 +5,7 @@ def dump_db_to_csv(conn_string, tables):
     with psycopg2.connect(conn_string) as conn, conn.cursor() as cursor:
         for table in tables:
             query = f"COPY {table} TO STDOUT WITH DELIMITER ',' CSV HEADER;"
-            with open(f'./result_tables/{table}.csv', 'w') as csv_file:
+            with open(f'./tables/{table}.csv', 'w') as csv_file:
                 cursor.copy_expert(query, csv_file)
 
 
@@ -13,7 +13,7 @@ def load_in_db_from_csv(conn_string, tables):
     with psycopg2.connect(conn_string) as conn, conn.cursor() as cursor:
         for table in tables:
             query = f"COPY {table} from STDIN WITH DELIMITER ',' CSV HEADER;"
-            with open(f'./result_tables/{table}.csv', 'r') as csv_file:
+            with open(f'./tables/{table}.csv', 'r') as csv_file:
                 cursor.copy_expert(query, csv_file)
 
 
