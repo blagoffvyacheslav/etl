@@ -17,8 +17,8 @@ def load_in_db_from_csv(conn_string, tables):
                 cursor.copy_expert(query, csv_file)
 
 
-db1 = "host='localhost' port=54320 dbname='benchmark_db' user='root' password='postgres'"
-db2 = "host='localhost' port=5433 dbname='benchmark_db' user='root' password='postgres'"
+db1 = "host='localhost' port=54320 dbname='db1' user='root' password='postgres'"
+db2 = "host='localhost' port=5433 dbname='db2' user='root' password='postgres'"
 tables = ['customer','lineitem','nation','orders','part','partsupp','region','supplier']
 
 dump_db_to_csv(db1, tables)
