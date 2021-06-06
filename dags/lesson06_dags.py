@@ -1,6 +1,6 @@
 from datetime import datetime
 from airflow import DAG
-from postgres import DataTransferPostgres
+from operators.postgres import DataTransferPostgres
 
 
 DEFAULT_ARGS = {

@@ -1,6 +1,6 @@
 import csv
 import psycopg2
-from data_transfer import DataTransfer
+from .data_transfer import DataTransfer
 
 
 class DataTransferPostgres(DataTransfer):
