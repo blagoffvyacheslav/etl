@@ -10,7 +10,7 @@ class DataFlowBaseOperator(BaseOperator):
     def write_etl_log(self, config):
         with psycopg2.connect(self.pg_meta_conn_str) as conn, conn.cursor() as cursor:
             query = '''
-            insert into log (
+            insert into etl.log (
                    source_launch_id
                  , target_schema
                  , target_table
@@ -35,7 +35,7 @@ class DataFlowBaseOperator(BaseOperator):
     def write_etl_statistic(self, config):
         with psycopg2.connect(self.pg_meta_conn_str) as conn, conn.cursor() as cursor:
             query = '''
-            insert into statistic (
+            insert into etl.statistic (
                    table_name
                  , column_name
                  , cnt_nulls
@@ -54,7 +54,7 @@ class DataFlowBaseOperator(BaseOperator):
                  , cnt_nulls
                  , cnt_all
                  , load_date
-              from x left join log l
+              from x left join etl.log l
                 on x.launch_id = l.target_launch_id
             '''
             cursor.execute(query.format(**config))
@@ -64,7 +64,7 @@ class DataFlowBaseOperator(BaseOperator):
         with psycopg2.connect(self.pg_meta_conn_str) as conn, conn.cursor() as cursor:
             query = '''
             select array_agg(distinct load_date order by load_date)
-                from log
+                from etl.log
                 where target_table = '{target_table}'
                 and target_schema = '{target_schema}'
                 and source_launch_id = -1
@@ -75,3 +75,25 @@ class DataFlowBaseOperator(BaseOperator):
             return dates
         else:
             return []
+
+    def get_launch_ids(self, config):
+        with psycopg2.connect(self.pg_meta_conn_str) as conn, conn.cursor() as cursor:
+            query = '''
+            select array_agg(distinct target_launch_id order by target_launch_id)::int[]
+                from etl.log
+                where target_launch_id not in (
+                select source_launch_id
+                    from etl.log
+                    where target_table = '{target_table}'
+                    and target_schema = '{target_schema}'
+                    and source_launch_id is not null
+                    )
+                and target_table = '{source_table}'
+                and target_schema = '{source_schema}'
+            '''
+            cursor = conn.cursor()
+            logging.info('Executing metadata query: {}'.format(query.format(**config)))
+            cursor.execute(query.format(**config))
+            ids = cursor.fetchone()[0]
+            logging.info('Launch_ids: {}'.format(ids))
+        return tuple(ids) if ids else ()
